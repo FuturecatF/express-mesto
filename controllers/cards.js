@@ -5,9 +5,7 @@ module.exports.getCards = (req, res) => {
     .then((cards) => {
       res.status(200).send({ data: cards });
     })
-    .catch((err) => {
-      return res.status(500).send({ message: `Произошла ошибка ${err}` });
-    });
+    .catch((err) => res.status(500).send({ message: `Произошла ошибка ${err}` }));
 };
 
 module.exports.createCard = (req, res) => {
@@ -45,7 +43,7 @@ module.exports.likeCard = (req, res) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $addToSet: { likes: req.user._id } }, // добавить _id в массив, если его там нет
-    { new: true }
+    { new: true },
   )
 
     .then((card) => res.send({ data: card }))
@@ -63,7 +61,7 @@ module.exports.dislikeCard = (req, res) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $pull: { likes: req.user._id } }, // убрать _id из массива
-    { new: true }
+    { new: true },
   )
 
     .then((card) => res.send({ data: card }))

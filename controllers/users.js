@@ -3,9 +3,7 @@ const User = require('../models/user');
 module.exports.getUsers = (req, res) => {
   User.find({})
     .then((user) => res.send({ data: user }))
-    .catch((err) => {
-      return res.status(500).send({ message: `Произошла ошибка ${err}` });
-    });
+    .catch((err) => res.status(500).send({ message: `Произошла ошибка ${err}` }));
 };
 
 module.exports.getUserById = (req, res) => {
@@ -44,7 +42,7 @@ module.exports.updateProfile = (req, res) => {
     {
       new: true,
       runValidators: true,
-    }
+    },
   )
     .orFail(new Error('NotFound'))
     .then((user) => res.send({ data: user }))
