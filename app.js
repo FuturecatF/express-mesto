@@ -8,6 +8,7 @@ const app = express();
 
 const userRouter = require('./routes/users');
 const cardsRouter = require('./routes/cards');
+const pageNotFoundRouter = require('./routes/pageNotFound');
 
 app.use(bodyParser.json());
 
@@ -27,6 +28,7 @@ app.use((req, res, next) => {
 
 app.use('/users', userRouter);
 app.use('/cards', cardsRouter);
+app.use('/', pageNotFoundRouter);
 
 app.listen(PORT, () => {
   console.log(`Сервер запустился на порту ${PORT}`);
