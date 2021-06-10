@@ -1,3 +1,5 @@
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
 const User = require('../models/user');
 
 module.exports.getUsers = (req, res) => {
@@ -26,8 +28,10 @@ module.exports.getUserById = (req, res) => {
 };
 
 module.exports.createUser = (req, res) => {
-  const { name, about, avatar } = req.body;
-  User.create({ name, about, avatar })
+  const { password } = req.body;
+  bcrypt
+    .hash(password, 10)
+    .then((hash) => User.create({ email: req.body.email, password: hash }))
     .then((user) => res.status(201).send({ data: user }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
@@ -37,6 +41,31 @@ module.exports.createUser = (req, res) => {
       }
       return res.status(500).send({ message: `Произошла ошибка ${err}` });
     });
+};
+
+module.exports.login = (req, res) => {
+  const { email, password } = req.body;
+
+  return User.findUserByCredentials(email, password)
+    .then((user) => {
+      const token = jwt.sign({ _id: user._id }, 'secret-slovo', { expiresIn: '7d' });
+      return res.send({ token });
+    })
+    .catch((err) => {
+      res.status(401).send({ message: err.message });
+    });
+};
+
+module.exports.getCurrentUser = (req, res, next) => {
+  const { _id } = req.user;
+  return User.findOne({ _id })
+    .then((user) => {
+      if (!user) {
+        throw new Error('Нет пользователя с таким id');
+      }
+      res.status(200).send({ data: user });
+    })
+    .catch(next);
 };
 
 module.exports.updateProfile = (req, res) => {
