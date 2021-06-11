@@ -21,16 +21,17 @@ module.exports.getUserById = (req, res, next) => {
       if (err.name === 'CastError') {
         throw new CastError('Передан некорректный _id');
       }
+      throw new NotFoundError(err.message);
     })
     .catch(next);
 };
 
 module.exports.createUser = (req, res, next) => {
-  const { password } = req.body;
+  const { password, email } = req.body;
   bcrypt
     .hash(password, 10)
-    .then((hash) => User.create({ email: req.body.email, password: hash }))
-    .then((user) => res.status(201).send({ data: user }))
+    .then((hash) => User.create({ email, password: hash }))
+    .then(({ _id }) => res.status(201).send({ email, _id }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
         throw new ValidationError('Переданы некорректные данные при создании пользователя');
@@ -51,7 +52,7 @@ module.exports.login = (req, res, next) => {
       return res.send({ token });
     })
     .catch(() => {
-      throw new UnauthorizedError('передан неверный JWT token');
+      throw new UnauthorizedError('Неправильные почта или пароль');
     })
     .catch(next);
 };
@@ -62,6 +63,9 @@ module.exports.getCurrentUser = (req, res, next) => {
     .orFail(new NotFoundError('Нет пользователя с таким _id'))
     .then((user) => {
       res.status(200).send({ data: user });
+    })
+    .catch((err) => {
+      throw new NotFoundError(err.message);
     })
     .catch(next);
 };
@@ -85,6 +89,7 @@ module.exports.updateProfile = (req, res, next) => {
       if (err.name === 'ValidationError') {
         throw new ValidationError('Переданы некорректные данные при обновлении профиля');
       }
+      throw NotFoundError(err.message);
     })
     .catch(next);
 };
@@ -107,6 +112,7 @@ module.exports.updateAvatar = (req, res, next) => {
       if (err.name === 'ValidationError') {
         throw new ValidationError('Переданы некорректные данные при обновлении аватара');
       }
+      throw new NotFoundError(err.message);
     })
     .catch(next);
 };

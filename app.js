@@ -26,13 +26,11 @@ app.use(errors());
 app.post('/signin', login);
 app.post('/signup', createUser);
 
-// app.use(auth);
-
 app.use('/users', auth, userRouter);
 app.use('/cards', auth, cardsRouter);
 
 app.use('/', pageNotFoundRouter);
-
+app.use(errors());
 app.use((err, req, res, next) => {
   // если у ошибки нет статуса, выставляем 500
   const { statusCode = 500, message } = err;

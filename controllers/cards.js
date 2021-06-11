@@ -26,9 +26,10 @@ module.exports.createCard = (req, res, next) => {
 
 module.exports.deleteCard = (req, res, next) => {
   Card.findById(req.params.cardId)
-    .orFail(new NotFoundError('Такой карточки нет в Базе Данных'))
+    .orFail(new NotFoundError('Карточка с указанным _id не найдена'))
     .then((card) => {
-      if (!(Card.owner !== req.user._id)) {
+      const cardOwner = card.owner.toString();
+      if (cardOwner !== req.user._id) {
         throw new ForbiddenError('Нельзя удалить карточку другого пользователя');
       } else {
         Card.findByIdAndDelete(req.params.cardId).then(() => {
@@ -40,6 +41,7 @@ module.exports.deleteCard = (req, res, next) => {
       if (err.name === 'CastError') {
         throw new CastError('Карточка с указанным _id не найдена');
       }
+      throw new NotFoundError(err.message);
     })
     .catch(next);
 };
@@ -51,11 +53,14 @@ module.exports.likeCard = (req, res, next) => {
     { new: true },
   )
     .orFail(new NotFoundError('Нет карточки с таким id'))
-    .then((card) => res.send({ data: card }))
+    .then((card) => {
+      res.send(card);
+    })
     .catch((err) => {
       if (err.name === 'CastError') {
         throw new CastError('Переданы некорректные данные для постановки лайка');
       }
+      throw new NotFoundError(err.message);
     })
     .catch(next);
 };
@@ -72,6 +77,7 @@ module.exports.dislikeCard = (req, res, next) => {
       if (err.name === 'CastError') {
         throw new CastError('Переданы некорректные данные при снятии лайка');
       }
+      throw new NotFoundError(err.message);
     })
     .catch(next);
 };
