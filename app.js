@@ -1,6 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+const { errors } = require('celebrate');
 const auth = require('./middlewares/auth');
 
 const { PORT = 3000 } = process.env;
@@ -20,6 +21,8 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
   useUnifiedTopology: true,
 });
 
+app.use(errors());
+
 app.post('/signin', login);
 app.post('/signup', createUser);
 
@@ -38,7 +41,7 @@ app.use((err, req, res, next) => {
     .send({
       // проверяем статус и выставляем сообщение в зависимости от него
       message: statusCode === 500
-        ? 'На сервере произошла ошибка'
+        ? 'ОДНА АШИПКА И ТЫ АШИПСЯ'
         : message,
     });
   next();
